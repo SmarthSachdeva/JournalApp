@@ -1,47 +1,55 @@
 package com.journalism.journalApplication.controller;
 
+
 import com.journalism.journalApplication.entity.User;
+import com.journalism.journalApplication.repository.UserRepository;
+import com.journalism.journalApplication.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
-import com.journalism.journalApplication.service.UserService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
+
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping
-    public List<User> getUsers() {
+    public List<User> getAllUsers(){
         return userService.getAllUsers();
     }
-    @PostMapping("/adduser")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
+
+    @PostMapping
+    public void createUser(@RequestBody User user){
         userService.saveEntry(user);
-        return new ResponseEntity<>(user , HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/deleteuser/{tempId}")
-    public ResponseEntity<User> deleteUser(@PathVariable Long tempId) {
-        User user = userService.getUserById(tempId);
-        userService.deleteUSerById(tempId);
-        return new ResponseEntity<>(user , HttpStatus.NO_CONTENT);
-    }
 
-    @PutMapping("/update/{userName}")
-    public ResponseEntity<?> updateUser(@RequestBody User user , @PathVariable String userName){
-        User existingUser = userService.findByUserName(userName);
-        if(existingUser != null){
-            existingUser.setUserName(user.getUserName());
-            existingUser.setPassword(user.getPassword());
-            userService.saveEntry((existingUser));
+    @PutMapping
+    public ResponseEntity<?> updateUser(@RequestBody User user) {
+
+        User userInDb = userService.findByUserName(user.getUserName());
+        if(userInDb != null){
+            userInDb.setUserName(user.getUserName());
+            userInDb.setPassword(user.getPassword());
+            userService.saveEntry(userInDb);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUserById() {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
 }
-
-

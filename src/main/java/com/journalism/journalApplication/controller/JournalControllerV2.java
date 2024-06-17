@@ -23,12 +23,11 @@ public class JournalControllerV2 {
     @Autowired
     private JournalService journalService;
 
-    @GetMapping("/{username}")
+   @GetMapping("/all/{username}")
     public ResponseEntity<?> getAllJournalsOfUser(@PathVariable String username) {
         User user = userService.findByUserName(username);
-        // List<JournalEntry> entriesSortedByUser = new ArrayList<>();
-        List<JournalEntry> entries = user.getJournals();
-        if(entries!=null){
+        List<JournalEntry> entries = user.getJournalEntries();
+        if(entries!=null && !entries.isEmpty()){
             return new ResponseEntity<>(entries , HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -47,11 +46,11 @@ public class JournalControllerV2 {
 
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<JournalEntry> create(@RequestBody JournalEntry entry) {
+   @PostMapping("/create/{userName}")
+    public ResponseEntity<JournalEntry> create(@RequestBody JournalEntry entry ,
+                                               @PathVariable String userName ) {
        try{
-           entry.setDate(LocalDate.now());
-           journalService.saveEntry(entry);
+           journalService.saveEntry(entry , userName);
            return new ResponseEntity<>(entry , HttpStatus.CREATED);
        }
        catch(Exception e){
@@ -60,10 +59,10 @@ public class JournalControllerV2 {
     }
 
     @DeleteMapping("/del/{tempId}")
-    public ResponseEntity<JournalEntry> deleteJournal(@PathVariable Long tempId) {
+    public ResponseEntity<JournalEntry> deleteJournal(@PathVariable Long tempId , @PathVariable String userName) {
         try{
             Optional<JournalEntry> deleted = journalService.getJournalById(tempId);
-            journalService.deleteEntryById(tempId);
+            journalService.deleteEntryById(tempId , userName);
             return new ResponseEntity<>(deleted.get() , HttpStatus.NO_CONTENT);
         }
         catch(Exception e){
@@ -71,17 +70,5 @@ public class JournalControllerV2 {
         }
     }
 
-    @PutMapping("/update/{tempId}")
-    public ResponseEntity<Boolean> updateJournal(@PathVariable Long tempId, @RequestBody JournalEntry j) {
-        JournalEntry je = journalService.getJournalById(tempId).orElse(null);
-        try{
-            je.setTitle(j.getTitle()!=null && !j.getTitle().isEmpty() ? je.getTitle() : j.getTitle());
-            je.setContent(j.getContent()!=null && !j.getContent().isEmpty() ? je.getContent() : j.getContent());
-            journalService.saveEntry(je);
-            return new ResponseEntity<>(true , HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(false , HttpStatus.NOT_FOUND);
-        }
-    }
 }
 

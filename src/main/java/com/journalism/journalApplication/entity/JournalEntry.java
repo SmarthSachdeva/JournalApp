@@ -24,6 +24,4 @@ public class JournalEntry {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-
 }
