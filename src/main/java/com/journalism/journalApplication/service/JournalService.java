@@ -3,6 +3,7 @@ package com.journalism.journalApplication.service;
 import com.journalism.journalApplication.entity.JournalEntry;
 import com.journalism.journalApplication.entity.User;
 import com.journalism.journalApplication.repository.JournalEntryRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,8 @@ public class JournalService {
     public List<JournalEntry> getAllJournalEntries() {
         return journalEntRep.findAll();
     }
+
+    @Transactional
     public void saveEntry(JournalEntry journalEntry, String userName) {
         try {
             User user = userService.findByUserName(userName);
